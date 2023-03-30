@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ziyiou.netshare.mapper.UserFileMapper">
+    <select id="userFileList" resultType="com.ziyiou.netshare.vo.UserFileListVO">
+        select * from userfile uf
+        left join file on file.fileId = uf.fileId
+        <where>
+            <if test="userFile.userId != null">
+                and uf.userId = #{userFile.userId}
+            </if>
+            <if test="userFile.filepath != null">
+                and uf.filepath = #{userFile.filepath}
+            </if>
+            <if test="userFile.extendName != null">
+                and uf.extendName = #{userFile.extendName}
+            </if>
+        </where>
+        ORDER BY  isDir desc
+        limit #{beginCount}, #{pageCount}
+    </select>
+
+    <sql id="selectByExtendName">
+        from userfile left join file on file.fileId = userfile.fileId
+        where extendName in
+        <foreach collection="filenameList" open="(" close=")" separator="," item="filename">
+            #{filename}
+        </foreach>
+        and userId = #{userId}
+    </sql>
+    <sql id="selectByNotExtendName">
+        from userfile left join file on file.fileId = userfile.fileId
+        where extendName not in
+        <foreach collection="filenameList" open="(" close=")" separator="," item="filename">
+            #{filename}
+        </foreach>
+        and userId = #{userId}
+    </sql>
+
+    <select id="selectFileByExtendName" parameterType="com.ziyiou.netshare.model.UserFile"
+            resultType="com.ziyiou.netshare.vo.UserFileListVO">
+        select *
+        <include refid="selectByExtendName"></include>
+        limit #{beginCount}, #{pageCount}
+    </select>
+
+    <select id="selectCountByExtendName" parameterType="com.ziyiou.netshare.model.UserFile" resultType="Long">
+        select count(*)
+        <include refid="selectByExtendName"></include>
+    </select>
+
+    <select id="selectFileNotInExtendName" parameterType="com.ziyiou.netshare.model.UserFile"
+            resultType="com.ziyiou.netshare.vo.UserFileListVO">
+        select *
+        <include refid="selectByNotExtendName"></include>
+        limit #{beginCount}, #{pageCount}
+    </select>
+
+    <select id="selectCountNotInExtendName" parameterType="com.ziyiou.netshare.model.UserFile" resultType="Long">
+        select count(*)
+        <include refid="selectByNotExtendName"></include>
+    </select>
+</mapper>

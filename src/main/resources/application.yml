@@ -1,0 +1,52 @@
+spring:
+  # 数据源
+  datasource:
+    url: jdbc:mysql://localhost:3306/netshare
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # JPA配置
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        dialect: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      enabled: true
+
+# 日志
+logging:
+  file:
+    name: D:/workspace/java/netshare/log/netshare.log
+  level:
+    root: info
+
+
+# mybatis
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  config-location: classpath:mybatis/mybatis-config.xml
+mybatis-plus:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: false
+
+
+# knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    swagger-model-name: NetShare网盘
+
+file:
+  storage-type: 0
