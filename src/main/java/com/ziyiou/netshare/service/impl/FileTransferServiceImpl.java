@@ -7,6 +7,8 @@ import com.ziyiou.netshare.mapper.UserFileMapper;
 import com.ziyiou.netshare.model.File;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.operation.FileOperationFactory;
+import com.ziyiou.netshare.operation.download.Downloader;
+import com.ziyiou.netshare.operation.download.domain.DownloadFile;
 import com.ziyiou.netshare.operation.upload.Uploader;
 import com.ziyiou.netshare.operation.upload.domain.UploadFile;
 import com.ziyiou.netshare.service.FileTransferService;
@@ -16,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 @Service
@@ -73,6 +76,26 @@ public class FileTransferServiceImpl implements FileTransferService {
 
     @Override
     public void downloadFile(HttpServletResponse httpServletResponse, Long userFileId) {
+        UserFile userFile = userFileMapper.selectById(userFileId);
 
+        String fileName = userFile.getFilename() + "." + userFile.getExtendName();
+        try {
+            fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        httpServletResponse.setContentType("application/force-download");// 设置强制下载不打开
+        httpServletResponse.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
+
+
+        File file = fileMapper.selectById(userFile.getFileId());
+        Downloader downloader = null;
+        if (file.getStorageType() == 0) {
+            downloader = localStorageOperationFactory.getDownloader();
+        }
+        DownloadFile uploadFile = new DownloadFile();
+        uploadFile.setFileUrl(file.getFileUrl());
+        uploadFile.setTimeStampName(file.getTimeStampName());
+        downloader.download(httpServletResponse, uploadFile);
     }
 }

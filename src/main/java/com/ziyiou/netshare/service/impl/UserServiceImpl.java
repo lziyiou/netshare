@@ -2,7 +2,6 @@ package com.ziyiou.netshare.service.impl;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.json.JSONException;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.jwt.JWT;
@@ -10,6 +9,7 @@ import cn.hutool.jwt.JWTUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ziyiou.netshare.common.RestResult;
+import com.ziyiou.netshare.constant.JwtConstant;
 import com.ziyiou.netshare.mapper.UserMapper;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.service.UserService;
@@ -90,14 +90,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public User getUserByToken(String token) {
-        User user;
-        try {
-            JWT jwt = JWTUtil.parseToken(token);
-            JSONObject sub = (JSONObject) jwt.getPayload("sub");
-            user = JSONUtil.toBean(sub, User.class);
-        } catch (JSONException e) {
-            user = null;
+        if (!StringUtils.hasText(token)) {
+            return null;
         }
-        return user;
+        boolean verify = JWTUtil.verify(token, JwtConstant.secret.getBytes());
+        if (!verify) {
+            return null;
+        }
+
+        JWT jwt = JWTUtil.parseToken(token);
+        JSONObject sub = (JSONObject) jwt.getPayload("sub");
+
+        return JSONUtil.toBean(sub, User.class);
     }
 }

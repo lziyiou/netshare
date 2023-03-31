@@ -16,10 +16,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +75,7 @@ public class FileTransferController {
     @Operation(summary = "上传文件", description = "真正的上传文件接口", tags = {"fileTransfer"})
     @PostMapping(value = "/file")
     public RestResult<UploadFileVO> uploadFile(HttpServletRequest request,
-                                               UploadFileDTO uploadFileDto,
+                                               @RequestBody UploadFileDTO uploadFileDto,
                                                @RequestHeader("token") String token) {
         // 验证用户认证状态
         User userByToken = userService.getUserByToken(token);
@@ -91,5 +89,9 @@ public class FileTransferController {
 
     }
 
-
+    @Operation(summary = "下载文件", description = "下载文件接口", tags = {"fileTransfer"})
+    @GetMapping(value = "/file")
+    public void downloadFile(HttpServletResponse response, Long userFileId) {
+        fileTransferService.downloadFile(response, userFileId);
+    }
 }

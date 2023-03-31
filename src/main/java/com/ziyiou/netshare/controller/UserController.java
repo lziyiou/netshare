@@ -1,6 +1,7 @@
 package com.ziyiou.netshare.controller;
 
 import com.ziyiou.netshare.common.RestResult;
+import com.ziyiou.netshare.dto.LoginDTO;
 import com.ziyiou.netshare.dto.RegisterDTO;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.service.UserService;
@@ -37,10 +38,10 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "用户登录", description = "用户登录认证后才能进入系统", tags = {"user"})
-    public RestResult<LoginVO> userLogin(String telephone, String password) {
+    public RestResult<LoginVO> userLogin(@RequestBody LoginDTO loginDTO) {
         User user = new User();
-        user.setTelephone(telephone);
-        user.setPassword(password);
+        user.setTelephone(loginDTO.getTelephone());
+        user.setPassword(loginDTO.getPassword());
 
         // 登录
         RestResult<User> result = userService.login(user);
@@ -57,7 +58,7 @@ public class UserController {
         return RestResult.success().data(loginVO);
     }
 
-    @PostMapping("/checkUserLogin")
+    @GetMapping("/checkUserLogin")
     @Operation(summary = "检查用户登录信息", description = "验证token的有效性", tags = {"user"})
     public RestResult<User> checkToken(@RequestHeader("token")String token){
         User userByToken = userService.getUserByToken(token);
