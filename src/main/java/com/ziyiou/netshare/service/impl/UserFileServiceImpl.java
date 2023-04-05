@@ -30,14 +30,14 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
     }
 
     @Override
-    public Map<String, Object> getUserFileByType(int fileType, Long currentPage, Long pageCount, Long userId) {
+    public Map<String, Object> getUserFileByType(int filetype, Long currentPage, Long pageCount, Long userId) {
         // 计算查询的条数页码
         Long beginCount = (currentPage-1) * pageCount;
 
         List<UserFileListVO> fileList = null; // 查询的数据结果
         Long total = 0L;    // 结果的条数
         List<String> arrList = null;
-        switch (fileType) {
+        switch (filetype) {
             case FileConstant.OTHER_TYPE -> {
                 arrList = new ArrayList<>();
                 arrList.addAll(Arrays.asList(FileConstant.DOC_FILE));
@@ -52,7 +52,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             case FileConstant.VIDEO_TYPE -> arrList = Arrays.asList(FileConstant.VIDEO_FILE);
             case FileConstant.MUSIC_TYPE -> arrList = Arrays.asList(FileConstant.MUSIC_FILE);
         }
-        if (fileType!= FileConstant.OTHER_TYPE) {
+        if (filetype != FileConstant.OTHER_TYPE) {
             fileList = userFileMapper.selectFileByExtendName(arrList, beginCount, pageCount,userId);
             total = userFileMapper.selectCountByExtendName(arrList, beginCount, pageCount,userId);
         }

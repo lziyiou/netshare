@@ -51,7 +51,7 @@ public class FileController {
         // 检查当前用户下是否有同目录下的文件名
         LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(UserFile::getFilename, createFileDTO.getFilename())
-                .eq(UserFile::getFilepath, createFileDTO.getFilePath())
+                .eq(UserFile::getFilepath, createFileDTO.getFilepath())
                 .eq(UserFile::getUserId, userByToken.getUserId());
         List<UserFile> userFileList = userFileService.list(lambdaQueryWrapper);
         if (!userFileList.isEmpty()) {
@@ -61,7 +61,7 @@ public class FileController {
         UserFile userFile = new UserFile();
         userFile.setUserId(userByToken.getUserId());
         userFile.setFilename(createFileDTO.getFilename());
-        userFile.setFilepath(createFileDTO.getFilePath());
+        userFile.setFilepath(createFileDTO.getFilepath());
         userFile.setIsDir(1);
         userFile.setUploadTime(DateUtil.date());
 
@@ -77,7 +77,7 @@ public class FileController {
      */
     @Operation(summary = "获取文件列表", description = "用来做前台文件列表展示", tags = {"file"})
     @GetMapping(value = "/fileList")
-    public RestResult<UserFileListVO> getUserFileList(@RequestBody UserFileListDTO userFileListDTO,
+    public RestResult<UserFileListVO> getUserFileList(UserFileListDTO userFileListDTO,
                                                       @RequestHeader("token") String token) {
         // 验证用户认证状态
         User userByToken = userService.getUserByToken(token);
@@ -105,7 +105,7 @@ public class FileController {
 
     /**
      * 通过文件类型选择文件
-     * @param fileType
+     * @param filetype
      * @param currentPage
      * @param pageCount
      * @param token
@@ -113,7 +113,7 @@ public class FileController {
      */
     @Operation(summary = "通过文件类型选择文件", description = "该接口可以实现文件格式分类查看", tags = {"file"})
     @GetMapping(value = "/fileList/type")
-    public RestResult<List<Map<String, Object>>> selectFileByFiletype(int fileType,
+    public RestResult<List<Map<String, Object>>> selectFileByFiletype(int filetype,
                                                                       Long currentPage,
                                                                       Long pageCount,
                                                                       @RequestHeader("token")String token) {
@@ -123,7 +123,7 @@ public class FileController {
             return RestResult.fail().message("用户未登录！");
         }
 
-        Map<String, Object> map = userFileService.getUserFileByType(fileType, currentPage,
+        Map<String, Object> map = userFileService.getUserFileByType(filetype, currentPage,
                 pageCount, userByToken.getUserId());
         return RestResult.success().data(map);
     }

@@ -3,6 +3,8 @@ package com.ziyiou.netshare.vo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @Schema(description = "用户文件列表VO")
 public class UserFileListVO {
@@ -13,7 +15,7 @@ public class UserFileListVO {
     @Schema(description="文件url")
     private String fileUrl;
     @Schema(description="文件大小")
-    private Long fileSize;
+    private Long filesize;
     @Schema(description="是否是oss存储")
     private Integer isOSS;
     @Schema(description="引用数量")
@@ -26,13 +28,13 @@ public class UserFileListVO {
     private Long userId;
 
     @Schema(description="文件名")
-    private String fileName;
+    private String filename;
     @Schema(description="文件路径")
-    private String filePath;
+    private String filepath;
     @Schema(description="扩展名")
     private String extendName;
     @Schema(description="是否是目录")
     private Integer isDir;
     @Schema(description="上传时间")
-    private String uploadTime;
+    private Date uploadTime;
 }

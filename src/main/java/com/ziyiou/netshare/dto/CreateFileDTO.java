@@ -9,5 +9,5 @@ public class CreateFileDTO {
     @Schema(description="文件名")
     private String filename;
     @Schema(description="文件路径")
-    private String filePath;
+    private String filepath;
 }

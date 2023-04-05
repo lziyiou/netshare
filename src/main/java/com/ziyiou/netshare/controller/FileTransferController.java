@@ -37,8 +37,8 @@ public class FileTransferController {
 
     @Operation(summary = "极速上传", description = "校验文件MD5判断文件是否存在，如果存在直接上传成功并返回skipUpload=true，" +
             "如果不存在返回skipUpload=false需要再次调用该接口的POST方法", tags = {"fileTransfer"})
-    @PostMapping("/fileSpeed")
-    public RestResult<UploadFileVO> uploadFileSpeed(@RequestBody UploadFileDTO uploadFileDTO,
+    @GetMapping("/file")
+    public RestResult<UploadFileVO> uploadFileSpeed(UploadFileDTO uploadFileDTO,
                                                     @RequestHeader("token") String token) {
         // 验证用户认证状态
         User userByToken = userService.getUserByToken(token);
@@ -75,7 +75,7 @@ public class FileTransferController {
     @Operation(summary = "上传文件", description = "真正的上传文件接口", tags = {"fileTransfer"})
     @PostMapping(value = "/file")
     public RestResult<UploadFileVO> uploadFile(HttpServletRequest request,
-                                               @RequestBody UploadFileDTO uploadFileDto,
+                                               UploadFileDTO uploadFileDto,
                                                @RequestHeader("token") String token) {
         // 验证用户认证状态
         User userByToken = userService.getUserByToken(token);
@@ -90,7 +90,7 @@ public class FileTransferController {
     }
 
     @Operation(summary = "下载文件", description = "下载文件接口", tags = {"fileTransfer"})
-    @GetMapping(value = "/file")
+    @GetMapping(value = "/file/download")
     public void downloadFile(HttpServletResponse response, Long userFileId) {
         fileTransferService.downloadFile(response, userFileId);
     }
