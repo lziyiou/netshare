@@ -92,8 +92,9 @@ public class FileTransferController {
             return RestResult.fail().message("用户未登录！");
         }
 
-        fileTransferService.uploadFile(multipartFile, uploadFileDto, userByToken.getUserId());
+        UserFile userFile = fileTransferService.uploadFile(multipartFile, uploadFileDto, userByToken.getUserId());
         UploadFileVO uploadFileVo = new UploadFileVO();
+        uploadFileVo.setUserFile(userFile);
         return RestResult.success().data(uploadFileVo);
 
     }

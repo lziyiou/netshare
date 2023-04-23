@@ -31,7 +31,7 @@ public class FileTransferServiceImpl implements FileTransferService {
     FileOperationFactory localStorageOperationFactory;
 
     @Override
-    public void uploadFile(MultipartFile multipartFile, UploadFileDTO uploadFileDTO, Long userId) {
+    public UserFile uploadFile(MultipartFile multipartFile, UploadFileDTO uploadFileDTO, Long userId) {
         Uploader uploader = null;
         UploadFile uploadFile = new UploadFile();
         uploadFile.setChunkNumber(uploadFileDTO.getChunkNumber());
@@ -51,6 +51,7 @@ public class FileTransferServiceImpl implements FileTransferService {
         String fpath = uploader.upload(multipartFile, uploadFile);
 
         // 上传成功判断
+        UserFile userFile = null;
         if (uploadFile.getChunkNumber() == uploadFile.getTotalChunks()) {
             File file = new File();
             file.setFileUrl(fpath);
@@ -63,7 +64,7 @@ public class FileTransferServiceImpl implements FileTransferService {
             //查出新插入数据的fileId
 
             // 插入到userFile表中，
-            UserFile userFile = new UserFile();
+            userFile = new UserFile();
             userFile.setFilepath(uploadFileDTO.getFilepath());
             userFile.setUploadTime(DateTime.now());
             userFile.setFilename(multipartFile.getOriginalFilename());
@@ -72,9 +73,9 @@ public class FileTransferServiceImpl implements FileTransferService {
             userFile.setIsDir(0);
             userFile.setExtendName(FileUtil.extName(multipartFile.getOriginalFilename()));
             userFileMapper.insert(userFile);
-
         }
 
+        return userFile;
     }
 
     @Override

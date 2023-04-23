@@ -1,11 +1,15 @@
 package com.ziyiou.netshare.controller;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.URLUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.model.dto.CreateFileDTO;
+import com.ziyiou.netshare.model.dto.RenameDTO;
 import com.ziyiou.netshare.model.dto.UserFileListDTO;
 import com.ziyiou.netshare.model.vo.UserFileListVO;
 import com.ziyiou.netshare.service.FileService;
@@ -17,6 +21,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +72,7 @@ public class FileController {
         userFile.setUploadTime(DateUtil.date());
 
         userFileService.save(userFile);
-        return RestResult.success();
+        return RestResult.success().data(userFile);
     }
 
     /**
@@ -132,8 +137,14 @@ public class FileController {
     }
 
 
+    /**
+     *  删除文件或目录，如果是目录则删除目录下所有文件
+     * @param userFileId    用户文件的id
+     * @param token         用户认证信息
+     * @return
+     */
     @DeleteMapping("/file")
-    public RestResult<List<Map<String, Object>>> deleteFile(int userFileId, @RequestHeader("token") String token) {
+    public RestResult deleteFile(int userFileId, @RequestHeader("token") String token) {
         // 验证用户认证状态
         User userByToken = userService.getUserByToken(token);
         if (userByToken == null) {
@@ -167,8 +178,33 @@ public class FileController {
             userFileService.removeById(userFileId);
         }
 
-        return null;
+        return RestResult.success().message("删除成功");
     }
 
+    @PutMapping("/file")
+    public RestResult rename(@RequestBody RenameDTO renameDTO, @RequestHeader("token") String token) {
+        // 验证用户认证状态
+        User userByToken = userService.getUserByToken(token);
+        if (userByToken == null) {
+            return RestResult.fail().message("用户未登录！");
+        }
+
+        return userFileService.rename(renameDTO.getUserFileId(), renameDTO.getNewName());
+    }
+
+    @GetMapping("/img")
+    public RestResult getImg(long userFileId, @RequestHeader("token") String token) {
+        // 验证用户认证状态
+        User userByToken = userService.getUserByToken(token);
+        if (userByToken == null) {
+            return RestResult.fail().message("用户未登录！");
+        }
+
+        // 获取文件路径
+        UserFile userFileById = userFileService.getById(userFileId);
+        String path = fileService.getById(userFileById.getFileId()).getFileUrl();
+        File imgFile = FileUtil.file(path);
+        return RestResult.success().data(URLUtil.getDataUriBase64("image/png", Base64.encode(imgFile)));
+    }
 }
 

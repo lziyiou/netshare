@@ -1,5 +1,6 @@
 package com.ziyiou.netshare.model.vo;
 
+import com.ziyiou.netshare.model.UserFile;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ public class UploadFileVO {
     private boolean needMerge;
     @Schema(description = "已经上传的分片", example = "[1,2,3]")
     private List<Integer> uploaded;
-
+    @Schema(description = "文件信息")
+    private UserFile userFile;
 
 }
