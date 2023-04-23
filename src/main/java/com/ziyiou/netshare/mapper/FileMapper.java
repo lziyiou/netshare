@@ -6,4 +6,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface FileMapper extends BaseMapper<File> {
+    void increaseFilePointCount(Long fileId);
+
+    void decreaseFilePointCount(Long fileId);
 }

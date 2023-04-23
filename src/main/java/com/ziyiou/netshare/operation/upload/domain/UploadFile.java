@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class UploadFile {
     private String filename;
-    private String filetype;
     private long filesize;
     private String timeStampName;
+    private String filepath;
     private int success;
     private String message;
     private String url;

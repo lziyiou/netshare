@@ -1,4 +1,4 @@
-package com.ziyiou.netshare.dto;
+package com.ziyiou.netshare.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

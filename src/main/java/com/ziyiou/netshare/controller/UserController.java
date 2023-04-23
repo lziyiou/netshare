@@ -1,12 +1,12 @@
 package com.ziyiou.netshare.controller;
 
 import com.ziyiou.netshare.common.RestResult;
-import com.ziyiou.netshare.dto.LoginDTO;
-import com.ziyiou.netshare.dto.RegisterDTO;
+import com.ziyiou.netshare.model.dto.LoginDTO;
+import com.ziyiou.netshare.model.dto.RegisterDTO;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.service.UserService;
 import com.ziyiou.netshare.util.JwtUtil;
-import com.ziyiou.netshare.vo.LoginVO;
+import com.ziyiou.netshare.model.vo.LoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;

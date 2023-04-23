@@ -39,7 +39,7 @@ mybatis-plus:
   mapper-locations: classpath:mybatis/mapper/*.xml
   configuration:
     map-underscore-to-camel-case: false
-
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 # knife4j的增强配置，不需要增强可以不配
 knife4j:
@@ -50,3 +50,4 @@ knife4j:
 
 file:
   storage-type: 0
+  local-path: D:/netshare/

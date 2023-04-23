@@ -1,4 +1,4 @@
-package com.ziyiou.netshare.vo;
+package com.ziyiou.netshare.model.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;

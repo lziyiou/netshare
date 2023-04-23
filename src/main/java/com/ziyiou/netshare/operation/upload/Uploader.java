@@ -2,17 +2,16 @@ package com.ziyiou.netshare.operation.upload;
 
 import cn.hutool.core.io.FileUtil;
 import com.ziyiou.netshare.operation.upload.domain.UploadFile;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
 
 @Slf4j
 public abstract class Uploader {
-    public abstract List<UploadFile> upload(HttpServletRequest request, UploadFile uploadFile);
+    public abstract String upload(MultipartFile multipartFile, UploadFile uploadFile);
 
     public synchronized boolean checkUploadStatus(UploadFile param, File confFile) throws IOException {
         RandomAccessFile confAccessFile = new RandomAccessFile(confFile, "rw");

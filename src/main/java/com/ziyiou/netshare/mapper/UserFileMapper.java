@@ -2,7 +2,7 @@ package com.ziyiou.netshare.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.ziyiou.netshare.model.UserFile;
-import com.ziyiou.netshare.vo.UserFileListVO;
+import com.ziyiou.netshare.model.vo.UserFileListVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;

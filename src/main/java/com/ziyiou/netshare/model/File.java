@@ -24,7 +24,7 @@ public class File {
     private String fileUrl;
 
     @Column(columnDefinition = "bigint(10) comment '文件大小'")
-    private Long fileSize;
+    private Long filesize;
 
     @Column(columnDefinition="int(1) comment '存储类型 0-本地存储, 1-阿里云存储, 2-FastDFS存储'")
     private Integer storageType;

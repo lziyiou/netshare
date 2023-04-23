@@ -5,7 +5,7 @@ import com.ziyiou.netshare.constant.FileConstant;
 import com.ziyiou.netshare.mapper.UserFileMapper;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.service.UserFileService;
-import com.ziyiou.netshare.vo.UserFileListVO;
+import com.ziyiou.netshare.model.vo.UserFileListVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,6 +44,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 arrList.addAll(Arrays.asList(FileConstant.IMG_FILE));
                 arrList.addAll(Arrays.asList(FileConstant.VIDEO_FILE));
                 arrList.addAll(Arrays.asList(FileConstant.MUSIC_FILE));
+                // 其他类型的查询数据库
                 fileList = userFileMapper.selectFileNotInExtendName(arrList, beginCount, pageCount, userId);
                 total = userFileMapper.selectCountNotInExtendName(arrList, beginCount, pageCount, userId);
             }
@@ -52,6 +53,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             case FileConstant.VIDEO_TYPE -> arrList = Arrays.asList(FileConstant.VIDEO_FILE);
             case FileConstant.MUSIC_TYPE -> arrList = Arrays.asList(FileConstant.MUSIC_FILE);
         }
+        // 指定类型的查询数据库
         if (filetype != FileConstant.OTHER_TYPE) {
             fileList = userFileMapper.selectFileByExtendName(arrList, beginCount, pageCount,userId);
             total = userFileMapper.selectCountByExtendName(arrList, beginCount, pageCount,userId);

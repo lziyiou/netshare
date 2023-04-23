@@ -2,7 +2,7 @@ package com.ziyiou.netshare.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ziyiou.netshare.model.UserFile;
-import com.ziyiou.netshare.vo.UserFileListVO;
+import com.ziyiou.netshare.model.vo.UserFileListVO;
 
 import java.util.List;
 import java.util.Map;
