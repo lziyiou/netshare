@@ -37,4 +37,6 @@ public class UserFileListVO {
     private Integer isDir;
     @Schema(description="上传时间")
     private Date uploadTime;
+    @Schema(description="图片数据")
+    private String imgData;
 }
