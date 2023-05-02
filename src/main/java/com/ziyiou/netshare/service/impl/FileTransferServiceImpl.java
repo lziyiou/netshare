@@ -2,6 +2,7 @@ package com.ziyiou.netshare.service.impl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.ziyiou.netshare.mapper.FileMapper;
 import com.ziyiou.netshare.mapper.UserFileMapper;
 import com.ziyiou.netshare.model.File;
@@ -76,6 +77,17 @@ public class FileTransferServiceImpl implements FileTransferService {
             userFile.setUserId(userId);
             userFile.setIsDir(0);
             userFile.setExtendName(FileUtil.extName(multipartFile.getOriginalFilename()));
+            long parentId = 0;
+            if (!uploadFileDTO.getFilepath().equals("/")) {
+                QueryWrapper<UserFile> queryWrapper = new QueryWrapper<>();
+                String filepath = uploadFileDTO.getFilepath().substring(0, uploadFileDTO.getFilepath().lastIndexOf('/'));
+                String parentPath = filepath.substring(0, filepath.lastIndexOf('/') + 1);
+                String parentName = filepath.substring(filepath.lastIndexOf('/') + 1);
+                queryWrapper.eq("filepath", parentPath).eq("filename", parentName);
+                UserFile parentUserfile = userFileService.getOne(queryWrapper);
+                parentId = parentUserfile.getUserFileId();
+            }
+            userFile.setParentId(parentId);
             userFileMapper.insert(userFile);
 
 

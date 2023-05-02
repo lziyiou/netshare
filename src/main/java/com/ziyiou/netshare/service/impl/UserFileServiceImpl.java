@@ -1,5 +1,8 @@
 package com.ziyiou.netshare.service.impl;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ziyiou.netshare.common.RestResult;
@@ -102,4 +105,45 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
 
         return RestResult.success().data(uf);
     }
+
+    @Override
+    public JSONArray getDirTree(Long userId) {
+        JSONArray dirTree = JSONUtil.createArray();
+
+        // 添加根目录
+        JSONObject rootData = JSONUtil.createObj();
+        rootData.set("label", "/");
+        rootData.set("value", 0);
+        JSONArray children = JSONUtil.createArray();
+        rootData.set("children", children);
+        dirTree.put(rootData);
+
+        appendDir(rootData, 0, userId);
+
+        return dirTree;
+    }
+
+    private void appendDir(JSONObject rootData, long parentId, Long userId) {
+        LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper
+                .eq(UserFile::getUserId, userId)
+                .eq(UserFile::getIsDir, 1)
+                .eq(UserFile::getParentId, parentId);
+        List<UserFile> dirs = this.list(lambdaQueryWrapper);
+        // 遍历当前目录，递归加入子级目录
+        dirs.forEach(item -> {
+            JSONObject obj = JSONUtil.createObj();
+            obj.set("label", item.getFilename());
+            obj.set("value", item.getUserFileId());
+            JSONArray objc = JSONUtil.createArray();
+            obj.set("children", objc);
+            rootData.append("children", obj);
+
+            // 递归子级
+            appendDir(obj, item.getUserFileId(), userId);
+        });
+
+    }
+
+
 }

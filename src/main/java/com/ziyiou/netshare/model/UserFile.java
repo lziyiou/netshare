@@ -43,4 +43,7 @@ public class UserFile {
 
     @Column(columnDefinition="timestamp comment '上传时间'")
     private Date uploadTime;
+
+    @Column(columnDefinition="bigint comment '父目录'")
+    private Long parentId;
 }

@@ -1,5 +1,6 @@
 package com.ziyiou.netshare.service;
 
+import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.model.UserFile;
@@ -13,4 +14,6 @@ public interface UserFileService extends IService<UserFile> {
     Map<String, Object> getUserFileByType(int fileType, Long currentPage, Long pageCount, Long userId);
 
     RestResult rename(Long userFileId, String newName);
+
+    JSONArray getDirTree(Long userId);
 }
