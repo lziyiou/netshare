@@ -39,4 +39,6 @@ public class UserFileListVO {
     private Date uploadTime;
     @Schema(description="图片数据")
     private String imgData;
+    @Schema(description="父id")
+    private String parentId;
 }

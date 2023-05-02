@@ -8,6 +8,7 @@ import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.model.dto.CreateFileDTO;
+import com.ziyiou.netshare.model.dto.MoveFileDTO;
 import com.ziyiou.netshare.model.dto.RenameDTO;
 import com.ziyiou.netshare.model.dto.UserFileListDTO;
 import com.ziyiou.netshare.model.vo.UserFileListVO;
@@ -168,8 +169,10 @@ public class FileController {
         if (userFile.getIsDir() == 1) {
             // 查出子级文件并删除
             LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-            lambdaQueryWrapper.likeRight(UserFile::getFilepath,
-                    userFile.getFilepath() + userFile.getFilename());
+            lambdaQueryWrapper
+                    .likeRight(UserFile::getFilepath,
+                    userFile.getFilepath() + userFile.getFilename())
+                    .eq(UserFile::getUserId, userByToken.getUserId());
             List<UserFile> userFileList = userFileService.list(lambdaQueryWrapper);
 
             for (UserFile uf : userFileList) {
@@ -221,6 +224,20 @@ public class FileController {
         return RestResult.success().data(dirTree);
     }
 
+    @Operation(summary = "移动文件", description = "移动文件", tags = {"file"})
+    @PutMapping("/file/move")
+    public RestResult moveFile(@RequestHeader("token") String token,
+                               @RequestBody MoveFileDTO moveFileDTO) {
+        // 验证用户认证状态
+        User userByToken = userService.getUserByToken(token);
+        if (userByToken == null) {
+            return RestResult.fail().message("用户未登录！");
+        }
+
+        userFileService.moveFile(moveFileDTO);
+
+        return RestResult.success().message("移动成功");
+    }
 
 }
 

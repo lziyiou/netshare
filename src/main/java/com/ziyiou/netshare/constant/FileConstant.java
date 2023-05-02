@@ -12,4 +12,7 @@ public interface FileConstant {
     int OTHER_TYPE = 5;
     int SHARE_FILE = 6;
     int RECYCLE_FILE = 7;
+
+
+    String FILE_SEPARATOR = "/";
 }

@@ -2,6 +2,7 @@ package com.ziyiou.netshare.operation.upload.product;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
+import com.ziyiou.netshare.constant.FileConstant;
 import com.ziyiou.netshare.operation.upload.Uploader;
 import com.ziyiou.netshare.operation.upload.domain.UploadFile;
 import com.ziyiou.netshare.util.PropertiesUtil;
@@ -28,9 +29,9 @@ public class LocalStorageUploader extends Uploader {
 
         // 文件按日期分文件夹
         String dirPath =
-                rootPath + DateTime.now().toString("yyyyMMdd") + File.separator;
+                rootPath + DateTime.now().toString("yyyyMMdd") + FileConstant.FILE_SEPARATOR;
         // 分片目录 合并后删除
-        String chunkPath = dirPath + uploadFile.getIdentifier() + File.separator;
+        String chunkPath = dirPath + uploadFile.getIdentifier() + FileConstant.FILE_SEPARATOR;
         FileUtil.mkdir(chunkPath);
         // 分片名
         String chunkFilepath = chunkPath + uploadFile.getIdentifier() + uploadFile.getChunkNumber();

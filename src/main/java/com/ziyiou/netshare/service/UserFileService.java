@@ -4,6 +4,7 @@ import cn.hutool.json.JSONArray;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.model.UserFile;
+import com.ziyiou.netshare.model.dto.MoveFileDTO;
 import com.ziyiou.netshare.model.vo.UserFileListVO;
 
 import java.util.List;
@@ -16,4 +17,6 @@ public interface UserFileService extends IService<UserFile> {
     RestResult rename(Long userFileId, String newName);
 
     JSONArray getDirTree(Long userId);
+
+    void moveFile(MoveFileDTO moveFileDTO);
 }

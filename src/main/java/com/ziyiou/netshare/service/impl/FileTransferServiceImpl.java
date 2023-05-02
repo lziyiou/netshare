@@ -90,17 +90,6 @@ public class FileTransferServiceImpl implements FileTransferService {
             userFile.setParentId(parentId);
             userFileMapper.insert(userFile);
 
-
-            // 如果是视频文件 直接生成分片文件mpd信息
-            // 生成视频流文件
-            // 获取视频路径
-            String filepath = file.getFileUrl();
-
-            // 将视频分片文件暂存到服务器目录下，定期清理
-            String parent = FileUtil.getParent(filepath, 1);
-            // 暂存到同级目录下，新建同名文件夹。
-            String slicePath = parent + java.io.File.separator + file.getIdentifier() + java.io.File.separator;
-
         }
 
         return userFile;

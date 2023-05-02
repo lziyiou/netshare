@@ -9,6 +9,7 @@ import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.constant.FileConstant;
 import com.ziyiou.netshare.mapper.UserFileMapper;
 import com.ziyiou.netshare.model.UserFile;
+import com.ziyiou.netshare.model.dto.MoveFileDTO;
 import com.ziyiou.netshare.model.vo.UserFileListVO;
 import com.ziyiou.netshare.service.UserFileService;
 import jakarta.annotation.Resource;
@@ -121,6 +122,54 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
         appendDir(rootData, 0, userId);
 
         return dirTree;
+    }
+
+    @Override
+    public void moveFile(MoveFileDTO moveFileDTO) {
+        // 1、根据userFileId查到文件或目录
+        LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper
+                .eq(UserFile::getUserFileId, moveFileDTO.getUserFileId());
+        UserFile userFile = this.getOne(lambdaQueryWrapper);
+
+        // 更新数据库
+        userFile.setParentId(moveFileDTO.getParentId());
+        // 查出新父路径
+        lambdaQueryWrapper.clear();
+        lambdaQueryWrapper
+                .select(UserFile::getFilename, UserFile::getFilepath)
+                .eq(UserFile::getUserFileId, moveFileDTO.getParentId())
+                .eq(UserFile::getUserId, userFile.getUserId());
+        UserFile parent = this.getOne(lambdaQueryWrapper);
+
+        String filepath = parent.getFilepath() + parent.getFilename() + FileConstant.FILE_SEPARATOR;
+
+        // 记录旧路径
+        String oldParentPath = userFile.getFilepath();
+        // 更新为新路径
+        userFile.setFilepath(filepath);
+        this.saveOrUpdate(userFile);
+
+
+        // 如果是文件夹需要多进行一步子级修改
+        if (userFile.getIsDir() == 1) {
+            // 3、如果是文件夹，修改本身和子级所有的filepath、parentId
+            // 1) 查出所有子级目录
+            lambdaQueryWrapper.clear();
+            lambdaQueryWrapper.likeRight(UserFile::getFilepath,oldParentPath + userFile.getFilename())
+                    .eq(UserFile::getUserId, userFile.getUserId());
+            List<UserFile> children = list(lambdaQueryWrapper);
+
+            children.forEach(item -> {
+                // 先查出原目录，只改掉需要改的前半部分   filepath
+                // 子目录不需修改父id
+                String oldPath = item.getFilepath();
+                String path = oldPath.replace(oldParentPath, userFile.getFilepath());
+                item.setFilepath(path);
+                this.saveOrUpdate(item);
+            });
+        }
+
     }
 
     private void appendDir(JSONObject rootData, long parentId, Long userId) {

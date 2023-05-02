@@ -2,6 +2,7 @@ package com.ziyiou.netshare.controller;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.RuntimeUtil;
+import com.ziyiou.netshare.constant.FileConstant;
 import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.service.FileService;
@@ -95,7 +96,7 @@ public class MediaStreamController {
         // 将视频分片文件暂存到服务器目录下，定期清理
         String parent = FileUtil.getParent(filepath, 1);
         // 暂存到同级目录下，新建同名文件夹。
-        String slicePath = parent + File.separator + fileById.getIdentifier() + File.separator;
+        String slicePath = parent + FileConstant.FILE_SEPARATOR + fileById.getIdentifier() + FileConstant.FILE_SEPARATOR;
 
         // 请求生成视频流文件
         if (!FileUtil.exist(slicePath) || FileUtil.isDirEmpty(new File(slicePath))) {
@@ -165,7 +166,7 @@ public class MediaStreamController {
         // 将视频分片文件暂存到服务器目录下，定期清理
         String parent = FileUtil.getParent(filepath, 1);
         // 暂存到同级目录下，新建同名文件夹。
-        String slicePath = parent + File.separator + fileById.getIdentifier() + File.separator;
+        String slicePath = parent + FileConstant.FILE_SEPARATOR + fileById.getIdentifier() + FileConstant.FILE_SEPARATOR;
         return slicePath;
     }
 }
