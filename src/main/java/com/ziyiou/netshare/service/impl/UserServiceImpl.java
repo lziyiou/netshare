@@ -63,10 +63,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String telephone = user.getTelephone();
         String password = user.getPassword();
 
+        if (!isTelephoneExit(telephone)) {
+            return RestResult.fail().message("手机号或密码错误！");
+        }
+
         // 通过手机号查询用户
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getTelephone, telephone);
         User saveUser = userMapper.selectOne(lambdaQueryWrapper);
+
         // 用户输入密码加盐对比
         String salt = saveUser.getSalt();
         String passwordAndSalt = password + salt;

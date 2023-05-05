@@ -173,4 +173,20 @@ public class MediaStreamController {
         // 暂存到同级目录下，新建同名文件夹。
         return parent + FileConstant.FILE_SEPARATOR + fileById.getIdentifier() + FileConstant.FILE_SEPARATOR;
     }
+
+    @GetMapping("/music/{id}")
+    public ResponseEntity<Resource> getMusic(@PathVariable("id") Long userFileId) {
+        // 获取音乐文件的资源
+        UserFile userfile = userFileService.getById(userFileId);
+        com.ziyiou.netshare.model.File file = fileService.getById(userfile.getFileId());
+        Resource resource = new FileSystemResource(file.getFileUrl());
+
+        // 返回响应体
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + userfile.getFilename() + "\"")
+                .body(resource);
+    }
+
 }
