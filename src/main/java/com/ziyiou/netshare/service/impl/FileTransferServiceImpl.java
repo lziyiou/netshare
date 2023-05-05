@@ -17,11 +17,9 @@ import com.ziyiou.netshare.service.FileTransferService;
 import com.ziyiou.netshare.service.UserFileService;
 import com.ziyiou.netshare.util.PropertiesUtil;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.UnsupportedEncodingException;
 
 @Service
 public class FileTransferServiceImpl implements FileTransferService {
@@ -96,27 +94,21 @@ public class FileTransferServiceImpl implements FileTransferService {
     }
 
     @Override
-    public void downloadFile(HttpServletResponse httpServletResponse, Long userFileId) {
+    public ResponseEntity<org.springframework.core.io.Resource> downloadFile(Long userFileId) {
         UserFile userFile = userFileMapper.selectById(userFileId);
 
         String fileName = userFile.getFilename() + "." + userFile.getExtendName();
-        try {
-            fileName = new String(fileName.getBytes("utf-8"), "ISO-8859-1");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        httpServletResponse.setContentType("application/force-download");// 设置强制下载不打开
-        httpServletResponse.addHeader("Content-Disposition", "attachment;fileName=" + fileName);// 设置文件名
-
 
         File file = fileMapper.selectById(userFile.getFileId());
         Downloader downloader = null;
         if (file.getStorageType() == 0) {
             downloader = localStorageOperationFactory.getDownloader();
         }
-        DownloadFile uploadFile = new DownloadFile();
-        uploadFile.setFileUrl(file.getFileUrl());
-        uploadFile.setTimeStampName(file.getTimeStampName());
-        downloader.download(httpServletResponse, uploadFile);
+        DownloadFile downloadFile = new DownloadFile();
+        downloadFile.setFileUrl(file.getFileUrl());
+        downloadFile.setTimeStampName(file.getTimeStampName());
+        downloadFile.setFilename(fileName);
+
+        return downloader.download(downloadFile);
     }
 }

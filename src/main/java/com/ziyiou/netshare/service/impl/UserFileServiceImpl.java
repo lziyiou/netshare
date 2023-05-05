@@ -1,5 +1,6 @@
 package com.ziyiou.netshare.service.impl;
 
+import cn.hutool.core.date.DateTime;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
@@ -8,9 +9,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ziyiou.netshare.common.RestResult;
 import com.ziyiou.netshare.constant.FileConstant;
 import com.ziyiou.netshare.mapper.UserFileMapper;
+import com.ziyiou.netshare.model.Share;
 import com.ziyiou.netshare.model.UserFile;
 import com.ziyiou.netshare.model.dto.MoveFileDTO;
+import com.ziyiou.netshare.model.dto.ShareFileDTO;
 import com.ziyiou.netshare.model.vo.UserFileListVO;
+import com.ziyiou.netshare.service.ShareService;
 import com.ziyiou.netshare.service.UserFileService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +27,11 @@ import java.util.*;
 public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> implements UserFileService {
     @Resource
     UserFileMapper userFileMapper;
+    @Resource
+    ShareService shareService;
 
     @Override
-    public List<UserFileListVO> getUserFileByFilePath(String filepath, Long userId, Long currentPage, Long pageCount) {
+    public List<UserFileListVO> getUserFileByFilepath(String filepath, Long userId, Long currentPage, Long pageCount) {
         // 计算查询的页码数
         Long beginCount = (currentPage - 1) * pageCount;
         // 查询数据
@@ -92,15 +98,15 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             lambdaQueryWrapper.likeRight(UserFile::getFilepath,
                     uf.getFilepath() + uf.getFilename());
             userFileList = this.list(lambdaQueryWrapper);
-            userFileList.forEach((item)->{
-                item.setFilepath(item.getFilepath().replace(uf.getFilepath()+uf.getFilename()+"/",
-                        uf.getFilepath()+newName+"/"));
+            userFileList.forEach((item) -> {
+                item.setFilepath(item.getFilepath().replace(uf.getFilepath() + uf.getFilename() + "/",
+                        uf.getFilepath() + newName + "/"));
                 this.updateById(item);
             });
 
         }
 
-            uf.setUserFileId(userFileId);
+        uf.setUserFileId(userFileId);
         uf.setFilename(newName);
         userFileMapper.updateById(uf);
 
@@ -119,7 +125,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
         rootData.set("children", children);
         dirTree.put(rootData);
 
-        appendDir(rootData, 0, userId);
+        TreeAppendDir(rootData, 0, userId);
 
         return dirTree;
     }
@@ -132,21 +138,28 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 .eq(UserFile::getUserFileId, moveFileDTO.getUserFileId());
         UserFile userFile = this.getOne(lambdaQueryWrapper);
 
-        // 更新数据库
-        userFile.setParentId(moveFileDTO.getParentId());
-        // 查出新父路径
-        lambdaQueryWrapper.clear();
-        lambdaQueryWrapper
-                .select(UserFile::getFilename, UserFile::getFilepath)
-                .eq(UserFile::getUserFileId, moveFileDTO.getParentId())
-                .eq(UserFile::getUserId, userFile.getUserId());
-        UserFile parent = this.getOne(lambdaQueryWrapper);
+        UserFile parent;
+        if (moveFileDTO.getParentId() == 0) {
+            parent = new UserFile();
+            parent.setFilepath("");
+            parent.setFilename("");
+        } else {
+            // 查出新父路径
+            lambdaQueryWrapper.clear();
+            lambdaQueryWrapper
+                    .select(UserFile::getFilename, UserFile::getFilepath)
+                    .eq(UserFile::getUserFileId, moveFileDTO.getParentId())
+                    .eq(UserFile::getUserId, userFile.getUserId());
+            parent = this.getOne(lambdaQueryWrapper);
+        }
 
         String filepath = parent.getFilepath() + parent.getFilename() + FileConstant.FILE_SEPARATOR;
 
         // 记录旧路径
         String oldParentPath = userFile.getFilepath();
-        // 更新为新路径
+        // 设置新parentId
+        userFile.setParentId(moveFileDTO.getParentId());
+        // 更新新路径
         userFile.setFilepath(filepath);
         this.saveOrUpdate(userFile);
 
@@ -156,7 +169,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             // 3、如果是文件夹，修改本身和子级所有的filepath、parentId
             // 1) 查出所有子级目录
             lambdaQueryWrapper.clear();
-            lambdaQueryWrapper.likeRight(UserFile::getFilepath,oldParentPath + userFile.getFilename())
+            lambdaQueryWrapper
+                    .likeRight(UserFile::getFilepath,
+                            oldParentPath + userFile.getFilename() + FileConstant.FILE_SEPARATOR)
                     .eq(UserFile::getUserId, userFile.getUserId());
             List<UserFile> children = list(lambdaQueryWrapper);
 
@@ -164,7 +179,7 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
                 // 先查出原目录，只改掉需要改的前半部分   filepath
                 // 子目录不需修改父id
                 String oldPath = item.getFilepath();
-                String path = oldPath.replace(oldParentPath, userFile.getFilepath());
+                String path = oldPath.replaceFirst(oldParentPath, userFile.getFilepath());
                 item.setFilepath(path);
                 this.saveOrUpdate(item);
             });
@@ -172,7 +187,37 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
 
     }
 
-    private void appendDir(JSONObject rootData, long parentId, Long userId) {
+    @Override
+    public String generateShareLink(ShareFileDTO shareFileDTO) {
+        /*
+        1、确定分享内容：确定要分享的内容，如网页、图片、视频等。
+        2、生成分享链接：将分享内容打包成链接，一般包括以下信息：分享的内容、分享者的身份信息、分享过期时间等。
+        3、生成短链接：将长链接转化为短链接，方便分享和传播。
+        4、分享链接：将生成的分享链接传递给需要分享的人，让其可以直接访问或下载分享的内容。
+         */
+
+        Share share = new Share();
+
+        // 1、查出要分享的文件信息。
+        UserFile userFile = this.getById(shareFileDTO.getUserFileId());
+        // 2、生成分享链接
+        String link = FileConstant.FILE_SEPARATOR + "s" +
+                FileConstant.FILE_SEPARATOR + UUID.randomUUID().toString().replace("-", "");
+
+
+        // 添加分享链接记录
+        share.setUserId(userFile.getUserId());
+        share.setUserFileId(shareFileDTO.getUserFileId());
+        share.setCreateTime(DateTime.now());
+        share.setExpiration(shareFileDTO.getExp());
+        share.setForm(shareFileDTO.getForm());
+        share.setShareLink(link);
+        shareService.save(share);
+
+        return link;
+    }
+
+    private void TreeAppendDir(JSONObject rootData, long parentId, Long userId) {
         LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper
                 .eq(UserFile::getUserId, userId)
@@ -189,10 +234,9 @@ public class UserFileServiceImpl extends ServiceImpl<UserFileMapper, UserFile> i
             rootData.append("children", obj);
 
             // 递归子级
-            appendDir(obj, item.getUserFileId(), userId);
+            TreeAppendDir(obj, item.getUserFileId(), userId);
         });
 
     }
-
 
 }

@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Schema(name = "文件列表DTO")
 public class UserFileListDTO {
-    @Schema(description = "文件路径")
+    @Schema(description = "文件分享路径")
     private String filepath;
     @Schema(description = "当前页码")
     private Long currentPage;

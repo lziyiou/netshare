@@ -1,8 +1,9 @@
 package com.ziyiou.netshare.operation.download;
 
 import com.ziyiou.netshare.operation.download.domain.DownloadFile;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 public abstract class Downloader {
-    public abstract void download(HttpServletResponse httpServletResponse, DownloadFile uploadFile);
+    public abstract ResponseEntity<Resource> download(DownloadFile uploadFile);
 }

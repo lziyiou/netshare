@@ -16,7 +16,7 @@ public class User {
     @Id
     @TableId(type = IdType.AUTO)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "bigint(20) comment'用户id'")
+    @Column(columnDefinition = "bigint(20) comment' 用户id'")
     private Long userId;
 
     @Column(columnDefinition = "varchar(30) comment '用户名'")

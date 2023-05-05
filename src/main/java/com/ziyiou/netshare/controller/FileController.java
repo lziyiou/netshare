@@ -103,7 +103,7 @@ public class FileController {
         }
 
         // 查询数据
-        List<UserFileListVO> fileList = userFileService.getUserFileByFilePath(userFileListDTO.getFilepath(),
+        List<UserFileListVO> fileList = userFileService.getUserFileByFilepath(userFileListDTO.getFilepath(),
                 userByToken.getUserId(), userFileListDTO.getCurrentPage(), userFileListDTO.getPageCount());
 
         // 查询数据总数量
@@ -238,6 +238,7 @@ public class FileController {
 
         return RestResult.success().message("移动成功");
     }
+
 
 }
 

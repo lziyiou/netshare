@@ -1,17 +1,25 @@
 package com.ziyiou.netshare.controller;
 
+import cn.hutool.core.date.DateBetween;
+import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUnit;
+import cn.hutool.core.date.DateUtil;
 import com.ziyiou.netshare.common.RestResult;
+import com.ziyiou.netshare.model.User;
 import com.ziyiou.netshare.model.dto.LoginDTO;
 import com.ziyiou.netshare.model.dto.RegisterDTO;
-import com.ziyiou.netshare.model.User;
+import com.ziyiou.netshare.model.vo.LoginVO;
+import com.ziyiou.netshare.model.vo.ShareVo;
+import com.ziyiou.netshare.service.ShareService;
 import com.ziyiou.netshare.service.UserService;
 import com.ziyiou.netshare.util.JwtUtil;
-import com.ziyiou.netshare.model.vo.LoginVO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -19,9 +27,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Resource
     UserService userService;
+    @Resource
+    private ShareService shareService;
 
     /**
-     *  注册接口
+     * 注册接口
+     *
      * @param registerDTO 用户名 手机号 密码
      * @return 登录成功或失败
      */
@@ -60,7 +71,7 @@ public class UserController {
 
     @GetMapping("/checkUserLogin")
     @Operation(summary = "检查用户登录信息", description = "验证token的有效性", tags = {"user"})
-    public RestResult<User> checkToken(@RequestHeader("token")String token){
+    public RestResult<User> checkToken(@RequestHeader("token") String token) {
         User userByToken = userService.getUserByToken(token);
 
         if (userByToken != null) {
@@ -68,5 +79,28 @@ public class UserController {
         } else {
             return RestResult.fail().message("用户暂未登录！");
         }
+    }
+
+    @GetMapping("/user")
+    @Operation(summary = "获取用户信息", description = "获取用户信息", tags = {"user"})
+    public RestResult<List<ShareVo>> getUserInfo(@RequestHeader("token") String token) {
+        User userByToken = userService.getUserByToken(token);
+
+        if (userByToken == null) {
+            return RestResult.fail().message("用户暂未登录！");
+        }
+
+        // 获取用户的分享数据记录
+
+        List<ShareVo> list = shareService.getShareInfo(userByToken.getUserId());
+
+        list.forEach(item -> {
+            DateTime expDay = DateUtil.offsetDay(item.getCreateTime(), item.getExp());
+            DateBetween between = expDay.between(DateTime.now());
+            String status = between.between(DateUnit.DAY) + "天" + between.between(DateUnit.HOUR) % 24 + "小时";
+            item.setStatus(status);
+        });
+
+        return RestResult.success().data(list);
     }
 }

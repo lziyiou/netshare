@@ -16,7 +16,7 @@ import com.ziyiou.netshare.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -101,7 +101,17 @@ public class FileTransferController {
 
     @Operation(summary = "下载文件", description = "下载文件接口", tags = {"fileTransfer"})
     @GetMapping(value = "/download")
-    public void downloadFile(HttpServletResponse response, Long userFileId) {
-        fileTransferService.downloadFile(response, userFileId);
+    public ResponseEntity<org.springframework.core.io.Resource> downloadFile(Long userFileId,
+                                                                             @RequestHeader("token") String token,
+                                                                             boolean isShare) {
+        // 验证用户认证状态
+        if (!isShare) {
+            User userByToken = userService.getUserByToken(token);
+            if (userByToken == null) {
+                return null;
+            }
+        }
+
+        return fileTransferService.downloadFile(userFileId);
     }
 }

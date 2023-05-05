@@ -42,16 +42,19 @@ public class MediaStreamController {
     public void getImg(long userFileId,
                        @RequestHeader(name = "token", required = false) String tokenByHeader,
                        String tokenByQuery,
-                       HttpServletResponse response) {
+                       HttpServletResponse response,
+                       boolean isShare) {
         // 验证用户认证状态
-        String token = tokenByQuery;
-        if (StringUtils.hasText(tokenByHeader)) {
-            token = tokenByHeader;
-        }
-        User userByToken = userService.getUserByToken(token);
-        if (userByToken == null) {
+        if (!isShare) {
+            String token = tokenByQuery;
+            if (StringUtils.hasText(tokenByHeader)) {
+                token = tokenByHeader;
+            }
+            User userByToken = userService.getUserByToken(token);
+            if (userByToken == null) {
 //            return RestResult.fail().message("用户未登录！");
-            return;
+                return;
+            }
         }
 
         // 获取文件路径
@@ -75,17 +78,21 @@ public class MediaStreamController {
     public ResponseEntity<Resource> getVideo(
             @PathVariable("id") long userFileId,
             @RequestHeader(name = "token", required = false) String tokenByHeader,
-            String tokenByQuery
+            String tokenByQuery,
+            boolean isShare
     ) {
         // 验证用户认证状态
-        String token = tokenByQuery;
-        if (StringUtils.hasText(tokenByHeader)) {
-            token = tokenByHeader;
-        }
-        User userByToken = userService.getUserByToken(token);
-        if (userByToken == null) {
+        if (!isShare) {
+            String token = tokenByQuery;
+            if (StringUtils.hasText(tokenByHeader)) {
+                token = tokenByHeader;
+            }
+
+            User userByToken = userService.getUserByToken(token);
+            if (userByToken == null) {
 //            return RestResult.fail().message("用户未登录！");
-            return null;
+                return null;
+            }
         }
 
         // 获取视频路径
@@ -157,16 +164,13 @@ public class MediaStreamController {
     }
 
     private String getSlicePath(UserFile userFileService) {
-        org.springframework.core.io.Resource resource;
         // 获取视频路径
-        UserFile userfile = userFileService;
-        com.ziyiou.netshare.model.File fileById = fileService.getById(userfile.getFileId());
+        com.ziyiou.netshare.model.File fileById = fileService.getById(userFileService.getFileId());
         String filepath = fileById.getFileUrl();
 
         // 将视频分片文件暂存到服务器目录下，定期清理
         String parent = FileUtil.getParent(filepath, 1);
         // 暂存到同级目录下，新建同名文件夹。
-        String slicePath = parent + FileConstant.FILE_SEPARATOR + fileById.getIdentifier() + FileConstant.FILE_SEPARATOR;
-        return slicePath;
+        return parent + FileConstant.FILE_SEPARATOR + fileById.getIdentifier() + FileConstant.FILE_SEPARATOR;
     }
 }
