@@ -95,9 +95,14 @@ public class UserController {
         List<ShareVo> list = shareService.getShareInfo(userByToken.getUserId());
 
         list.forEach(item -> {
-            DateTime expDay = DateUtil.offsetDay(item.getCreateTime(), item.getExp());
-            DateBetween between = expDay.between(DateTime.now());
-            String status = between.between(DateUnit.DAY) + "天" + between.between(DateUnit.HOUR) % 24 + "小时";
+            String status;
+            if (item.getExp() == -1) {
+                status = "永久有效";
+            } else {
+                DateTime expDay = DateUtil.offsetDay(item.getCreateTime(), item.getExp());
+                DateBetween between = expDay.between(DateTime.now());
+                status = between.between(DateUnit.DAY) + "天" + between.between(DateUnit.HOUR) % 24 + "小时";
+            }
             item.setStatus(status);
         });
 

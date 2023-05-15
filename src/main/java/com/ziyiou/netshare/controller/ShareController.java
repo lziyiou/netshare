@@ -86,7 +86,7 @@ public class ShareController {
 
 
         List<UserFileListVO> fileList = new ArrayList<>();
-        long total = 0;
+        long total;
         if (Objects.equals(userFileListDTO.getFilepath(), "/")) {
             UserFileListVO userFileListVO = BeanUtil.toBean(userFile, UserFileListVO.class);
             File file = fileService.getById(userFile.getFileId());
@@ -116,10 +116,15 @@ public class ShareController {
         map.put("total", total);
         map.put("list", fileList);
         map.put("shareUser", shareUser);
-        DateTime expDay = DateUtil.offsetDay(share.getCreateTime(), share.getExpiration());
-        DateBetween between = expDay.between(DateTime.now());
-        map.put("remainder",
-                between.between(DateUnit.DAY) + "天" + between.between(DateUnit.HOUR) % 24 + "小时");    // 剩余时间
+        String remainder;
+        if (share.getExpiration() == -1) {
+            remainder = "永久有效";
+        } else {
+            DateTime expDay = DateUtil.offsetDay(share.getCreateTime(), share.getExpiration());
+            DateBetween between = expDay.between(DateTime.now());
+            remainder = between.between(DateUnit.DAY) + "天" + between.between(DateUnit.HOUR) % 24 + "小时";
+        }
+        map.put("remainder", remainder);    // 剩余时间
 
 
         return RestResult.success().data(map);
